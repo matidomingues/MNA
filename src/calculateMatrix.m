@@ -7,6 +7,6 @@ function Z = calculateMatrix(column)
 		Z(i,3) = sin(2*pi*f1*t);
 		Z(i,4) = column(i,4);
 	end
-	Z
+	Z;
 end
 
