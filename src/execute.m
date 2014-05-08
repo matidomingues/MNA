@@ -5,15 +5,15 @@ function X = execute(data,f)
 		[A, y] = calculateMatrix(column);
         if f == 0
             [Q,R] = solveQRGS(A);
-            X(i, :) = inv(R) * Q' * y;
+            X(i-3, :) = inv(R) * Q' * y;
         elseif f == 1
             B = A' * A;
             G = cholesky(B);
             z0 = inv(G) * A' * y;
             x0 = inv(G') * z0;
-            X(i, :) = x0;
+            X(i-3, :) = x0;
         else
-            X(i, :) = A\y;
+            X(i-3, :) = A\y;
             %Este metodo es el super optimo de matlab
         end
 	end
