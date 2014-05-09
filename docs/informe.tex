@@ -1,0 +1,369 @@
+
+\documentclass[]{article}
+\newtheorem{theorem}{Teorema}
+\newtheorem{lemma}[theorem]{Lemma}
+\renewcommand{\abstractname}{Abstract}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{bold-extra}
+
+
+%Para mostrar el código de Octave
+\usepackage{color}
+\usepackage{listings}
+\lstset{ %
+language=Octave,                % choose the language of the code
+basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+numbers=left,                   % where to put the line-numbers
+numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+numbersep=5pt,                  % how far the line-numbers are from the code
+backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+showspaces=false,               % show spaces adding particular underscores
+showstringspaces=false,         % underline spaces within strings
+showtabs=false,                 % show tabs within strings adding particular underscores
+frame=single,           % adds a frame around the code
+tabsize=2,          % sets default tabsize to 2 spaces
+captionpos=b,           % sets the caption-position to bottom
+breaklines=true,        % sets automatic line breaking
+breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+escapeinside={\%*}{*)}          % if you want to add a comment within your code
+}
+
+
+
+\begin{document}
+
+\title{Estimación de la velocidad del viento con el método de cuadrados mínimos}
+\author{Alan Pierri, Luciana Reznik, Matias Dominguez}
+%\date{20 Septiembre 2012}
+\maketitle
+
+\pagebreak
+
+\tableofcontents
+
+\pagebreak
+
+
+\section{Objetivo del trabajo}
+\par El objetivo del siguiente trabajo práctico es el cálculo de una función de estimación de la velocidad del viento en Irlanda, a partir de los datos obtenidos en 12 estaciones meteorológicas entre los años 1961 y 1978.
+
+\pagebreak
+
+\section{Implementación}
+\par Para obtener la estimación de la velocidad del viento en función del tiempo en días, se utilizó el método de cuadrados mínimos, que trata de aproximar los valores obtenidos empíricamente a una curva determinada. Para ello, se utilizaron dos implementaciones diferentes. Por un lado  el método de QR utilizando Gram-Schmidt y por el otro, el método de Cholesky.
+
+La función a partir de la cual se ajustaron los datos, fue:
+\begin{eqnarray}
+	V(t) &=& A_0 + A_1 cos(2 \pi f_1 t) + B_1 sin(2 \pi f_1 t)
+\end{eqnarray}
+siendo
+\begin{eqnarray}
+	f_1 = 1/365.25 * dia^-1
+\end{eqnarray}
+
+Para resolver cuadrados mínimos, es necesario plantear la ecuación
+
+\begin{eqnarray} \label{eq:solve}
+    A\vec{x}&=&\vec{b}
+\end{eqnarray}
+
+donde el $\vec{x}$ es el vector columna con los coeficientes buscados, $\vec{b}$ es el vector columna con los valores de s correspondientes a cada  t, y donde A es la matriz formada por la función $y_2(t)$ evaluada en cada t, con la siguiente estructura:
+
+\[ \left( \begin{array}{ccc}
+t_1^0 & t_1^1 & t_1^2 \\
+t_2^0 & t_2^1 & t_2^2 \\
+... & ... & ... \\
+t_n^n & t_n^1 & t_n^2 
+\end{array} \right)\] 
+
+donde el error queda planteado de la siguiente forma:
+
+\begin{eqnarray}
+    ||A\vec{x}-\vec{b}||_2^2
+\end{eqnarray}
+
+
+\subsection{Método de Cholesky}
+
+\par Dado por probado el teorema que demuestra la existencia de la descomposición de Cholesky, se puede aproximar el valor de $\vec{x}$ en la ecuación \ref{eq:solve}.
+
+\begin{theorem}
+\par Si X es cuadrada, simétrica y definida positiva $\Rightarrow$  $\exists$  G  triangular inferior /  X = G G^T
+\end{theorem}
+
+
+\par Se multiplica ambos lados de la ecuación \ref{eq:solve} por $A$ transpuesta obteniendo:
+\begin{eqnarray}
+    A^T A \vec{x} &=& A^T \vec{b}
+\end{eqnarray}
+Se propone la siguiente igualdad usando la matriz $G$ obtenida en la descomposición de Cholesky:
+\begin{eqnarray}
+    G G^T &=& A^T A
+\end{eqnarray}
+\par Luego utilizando la sustitución progresiva siguiente:
+\begin{eqnarray}
+    G G^T \vec{x} &=& A^T \vec{b}\\
+	z &=& G^T \vec{x}\\
+	G \vec{z} &=& A^T \vec{b}\\
+	G^T \vec{x} &=& \vec{z}
+\end{eqnarray}
+se obtiene el valor aproximado de $\vec{x}$.
+
+
+
+\subsection{Método QR}
+\par
+Sea $A = QR$, se sabe que $x$ minimiza $||A\vec{x}-\vec{b}||_2 \Leftrightarrow ||R\vec{x}-Q\vec{b}||^{2}_{2} = 0$.
+Entonces, el objetivo resulta resolver la ecuación \ref{eq:rxqb} 
+\begin{eqnarray} \label{eq:rxqb}
+    R\vec{x} &=& Q^T \vec{b}
+\end{eqnarray}
+y por sustitución regresiva obtener \vec{x}. 
+
+\par
+Para obtener $QR$ se utilizó el método de Gram-Schmidt 
+
+\pagebreak
+
+\section{Datos obtenidos}
+\subsection{Velocidad media por estación}
+
+\begin{table}[h!tbp]
+    \centering
+	\begin{tabular}{|c|c|}
+		\hline 
+		Estacion & V(t)  \\
+		\hline \hline
+		1 &12,32299\\ \hline
+		2 & 10,56056 \\ \hline
+		3 & 11,71465 \\ \hline
+		4 & 6,28301 \\ \hline
+		5 & 10,34253 \\ \hline
+		6 & 7,04890 \\ \hline
+		7 & 9,85677 \\ \hline
+		8 & 8,46068 \\ \hline
+		9 & 8,47582 \\ \hline
+		10 & 8,65531 \\ \hline
+		11 & 13,13176 \\ \hline
+		12 & 15,54641 \\ \hline
+	\end{tabular}
+	\caption{Valores de las velocidades medias obtenidas}
+	\label{table:}
+\end{table}
+
+\subsection{Coeficientes de la función de aproximación}
+
+\begin{table}[h!tbp]
+    \centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline 
+		Estacion & $A_0$ & $A_1$ & $B_1$ \\
+		\hline \hline
+		1 & 6.35707 & -0.01821 & 0.03675 \\ \hline
+		2 & 5.47711	& -0.04429 & -0.00061 \\ \hline
+		3 & 5.99067 & 0.03156	& 0.08428\\ \hline
+		4 & 3.23929 & -0.01074 & 0.05357 \\ \hline
+		5 & 5.37646	& -0.05889	& 0.03337\\ \hline
+		6 &3.64286 & -0.02312 & 0.06211\\ \hline
+		7 & 5.03213 & 0.02872 & 0.08423\\ \hline
+		8 & 4.36409 & -0.02041 & 0.06323 \\ \hline
+		9 & 4.36889	& -0.01161 & 0.01893 \\ \hline
+		10 &4.47136	& -0.03418 & 0.08758 \\ \hline
+		11 & 6.74920 & 0.00477 & 0.00889 \\ \hline
+		12 & 8.03229 & -0.01891 & -0.07814 \\ \hline
+		
+	\end{tabular}
+	\caption{Coeficientes obtenidos con la implementación de QR}
+	\label{table:}
+\end{table}
+
+
+\begin{table}[h!tbp]
+    \centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline 
+		Estacion & $A_0$ & $A_1$ & $B_1$ \\
+		\hline \hline
+		1 & 6.35707081 & -0.01820940 & 0.03674981 \\ \hline
+		2 & 5.47710517 &	-0.04429044	& -0.00060650 \\ \hline
+		3 &5.99066747 &	0.03156476 &	0.08427996\\ \hline
+		4 & 3.23929484 &	-0.01074494 &	0.05357270 \\ \hline
+		5 & 5.37646141 &	-0.05888658 &	0.03337499\\ \hline
+		6 &3.64286185 &	-0.02311715 &	0.06211073\\ \hline
+		7 & 5.03212609 &	0.02872138 &	0.08423441\\ \hline
+		8 &4.36409277 &	-0.02040780	 & 0.06322703 \\ \hline
+		9 &4.36889099 &	-0.01160855 &	0.01893036 \\ \hline
+		10 & 4.47135695 &	-0.03417731 &	0.08758244 \\ \hline
+		11 & 6.74920424 &	0.00476971 &	0.00888903 \\ \hline
+		12 & 8.03228508 & -0.01890634 & -0.07813697 \\ \hline
+
+	\end{tabular}
+	\caption{Coeficientes obtenidos con la implementación de Cholesky}
+	\label{table:}
+\end{table}
+
+\begin{table}[h!tbp]
+    \centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline 
+		Estacion & $A_0$ & $A_1$ & $B_1$ \\
+		\hline \hline
+		1 & 6.35707081 &	-0.01820940	& 0.03674981 \\ \hline
+		2 & 5.47710517 &	-0.04429044 &	-0.00060650\\ \hline
+		3 &5.99066747 &	0.03156476 &	0.08427996\\ \hline
+		4 & 3.23929484 &	-0.01074494 &	0.05357270 \\ \hline
+		5 & 5.37646141 &	-0.05888658 &	0.03337499\\ \hline
+		6 &3.64286185 &	-0.02311715 &	0.06211073\\ \hline
+		7 & 5.03212609 &	0.02872138 &	0.08423441\\ \hline
+		8 &4.36409277 &	-0.02040780 &	0.06322703 \\ \hline
+		9 &4.36889099 &	-0.01160855 &	0.01893036 \\ \hline
+		10 & 4.47135695 &	-0.03417731 &	0.08758244 \\ \hline
+		11 & 6.74920424 &	0.00476971 &	0.00888903 \\ \hline
+		12 & 8.03228508 &	-0.01890634 &	-0.07813697 \\\hline
+
+	\end{tabular}
+	\caption{Coeficientes obtenidos con la implementación de Matlab}
+	\label{table:}
+\end{table}
+
+\pagebreak
+
+\section{Preguntas teóricas adicionales}
+
+\subsection{Calcule el error cuadrático medio del ajuste.}
+
+\begin{table}[h!tbp]
+    \centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline 
+		Estacion & ECM Cholesky & ECM QR & ECM Matlab\\
+		\hline \hline
+		1 & 3.63807 & 0 & 0 \\ \hline
+		2 & 1.07534 & 0 & 0\\ \hline
+		3 & 0.15304 & 0 & 0\\ \hline
+		4 & 0.15304 & 0 & 0\\ \hline
+		5 & 0.15304 & 0 & 0\\ \hline
+		6 & 0.15304 & 0 & 0\\ \hline
+		7 & 0.15304 & 0 & 0\\ \hline
+		8 & 0.15304 & 0 & 0\\ \hline
+		9 & 0.15304 & 0 & 0\\ \hline
+		10 & 0.15304 & 0 & 0\\ \hline
+		11 & 0.15304 & 0 & 0\\ \hline
+		12 & 0.15304 & 0 & 0\\ \hline
+		
+	\end{tabular}
+	\caption{ECM por estación para ambos métodos}
+	\label{table:}
+\end{table}
+
+\subsection{¿Por qué 365.25 días de período?}
+\par 
+El período elegido de 365.25 días corresponde a la duración media de un año y fue la unidad elegida ya que año tras año, el clima se supone periódico. Tomar un período menor, incurriría en el error de pensar que por ejemplo, las estaciones del año no modifican los comportamientos de las velocidades de los vientos.
+
+\subsection{¿Cómo se relaciona $A_0$ con el valor medio calculado más arriba?}
+\par
+El valor de $A_0$  tiende al valor medio de la velocidad de las estaciones meteorológicas, ya que la suma de los coeficientes de la serie de Fourier 
+\begin{eqnarray}
+	A_1 cos(2 \pi f_1 t) + B_1 sin(2 \pi f_1 t)
+\end{eqnarray}
+tienden a anularse.
+
+\subsection{Grafique un histograma del error entre los valores y el ajuste.}
+
+% \begin{figure}        
+%     \centering
+%     \includegraphics[width=400px]{images/wind2.png}  
+% 	\caption{Ajuste por cuadrados mínimos para los datos obtenidos en la estación 1 en 1961}
+%     \label{figure:station1year1}
+% \end{figure}
+
+\pagebreak
+
+\section{Anexo}
+
+\par Los códigos utilizados fueron:
+ 
+\subsection{Método main}
+execute.m
+\begin{lstlisting}
+function X = execute(data,f)
+    column = data(:,1:3);
+	for i=4:size(data(1,:),2);
+		column(:,4) = data(:,i);
+		[A, y] = calculateMatrix(column);
+        if f == 0
+            [Q,R] = solveQRGS(A);
+            X(i-3, :) = inv(R) * Q' * y;
+        elseif f == 1
+            B = A' * A;
+            G = cholesky(B);
+            z0 = inv(G) * A' * y;
+            x0 = inv(G') * z0;
+            X(i-3, :) = x0;
+        else
+            X(i-3, :) = A/y;
+            %Este metodo es el super optimo de matlab
+        end
+	end
+end
+\end{lstlisting}
+
+\subsection{Método QR con Gram Shmidt}
+solveQRGS.m
+\begin{lstlisting}
+function [Q, R] = solveQRGS(A)
+	Q = [];
+	for i = 1:size(A, 2)
+		 v = A(:, i);
+		 for j = 1:(i-1)
+		 	v = v - (v' * Q(:, j)) * Q(:, j);
+		 end
+		 Q(:, i) = v ./ norm(v);
+	end
+	R = Q' * A;
+end
+\end{lstlisting}
+
+\subsection{Método de Cholesky}
+cholesky.m
+\begin{lstlisting}
+ffunction chol = cholesky( matrix )
+
+
+n = size(matrix,2);
+chol = zeros(n);
+
+for i=1:n
+   chol(i, i) = sqrt(matrix(i, i) - chol(i, :)*chol(i, :)');
+   for j=(i + 1):n
+      chol(j, i) = (matrix(j, i) - chol(i,:)*chol(j ,:)')/chol(i, i);
+   end
+end
+
+end
+
+\end{lstlisting}
+
+\subsection{Cálculo de la velocidad estimada}
+getVelocity.m
+\begin{lstlisting}
+function vel = getVelocity( vars )
+	f1 = 1/365.25;
+    vel = [];
+	for i=1:size(vars,1)
+        a=vars(i,1);
+        b=vars(i,2);
+        c=vars(i,3);
+		vel(i) = a + b * cos(2*pi*f1*i)+ c * sin(2*pi*f1*i);
+    end
+    vel = vel';
+end
+
+\end{lstlisting}
+
+
+\end{document}
