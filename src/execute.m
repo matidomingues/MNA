@@ -6,6 +6,7 @@ function X = execute(data,f)
         if f == 0
             [Q,R] = solveQRGS(A);
             X(i-3, :) = inv(R) * Q' * y;
+            err(i)=calculateError(A,X,y);
         elseif f == 1
             B = A' * A;
             G = cholesky(B);
