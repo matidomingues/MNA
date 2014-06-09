@@ -1,0 +1,1 @@
+function frecuencies = calculateNumber(call)
