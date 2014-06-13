@@ -39,7 +39,7 @@ function frecuencies = calculateFrecuencies(call)
 
 	if(meansloc(1) > 4)
 		meansloc(1) -= 4;
-	else
+	elseo
 		meansloc(2) -= 4;
 	endif
 	frecuencies = f(meansloc(1), meansloc(2));
