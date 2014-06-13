@@ -2,7 +2,7 @@ function frecuencyAnswer = getFrecuencyAnswer(func, fs)
 	vector= 0:pi/256:pi;
 	frec = (vector*fs/(2*pi));
 	frecuencyAnswer = freqz(func, 1, vector);
-	stem(frec, abs(frecuencyAnswer));
+	plot(frec, abs(frecuencyAnswer));
 	loc = frecuencyAnswer >= (1/sqrt(2));
 	before = false;
 	band = 0;
